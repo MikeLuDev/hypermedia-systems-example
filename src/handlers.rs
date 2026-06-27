@@ -7,9 +7,9 @@ use axum::{
 use serde::Deserialize;
 
 use crate::{
-    contact::{self, Contact, ContactErrors, NewContact},
+    contact::{Contact, ContactErrors, NewContact},
     error::AppError,
-    state::{self, AppState},
+    state::AppState,
     templates::{
         EditContactTemplate, GetContactTemplate, IndexTemplate, NewContactTemplate,
         NotFoundTemplate,
@@ -131,4 +131,14 @@ pub async fn post_edit_contact(
     };
 
     Ok(response)
+}
+
+pub async fn delete_contact(
+    State(state): State<AppState>,
+    Path(contact_id): Path<u64>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut guard = state.contacts.write().await;
+    let _ = guard.delete(contact_id);
+
+    Ok(Redirect::to("/contacts"))
 }

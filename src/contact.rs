@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::Deserialize;
 
 #[derive(Clone)]
@@ -61,12 +63,6 @@ impl NewContact {
         })
     }
 }
-
-#[derive(Clone)]
-pub struct Contacts {
-    contacts: Vec<Contact>,
-}
-
 // #[derive(Clone, Deserialize)]
 pub struct ContactErrors {
     pub id: String,
@@ -97,51 +93,60 @@ impl Default for ContactErrors {
     }
 }
 
+#[derive(Clone)]
+pub struct Contacts {
+    contacts: HashMap<u64, Contact>,
+}
+
 impl Contacts {
     pub fn new() -> Self {
-        Self {
-            contacts: vec![
-                Contact {
-                    id: 0,
-                    first: "Margaret".to_string(),
-                    last: "Hamilton".to_string(),
-                    phone: 19365551234,
-                    email: "margaret@apollo.nasa".to_string(),
-                },
-                Contact {
-                    id: 1,
-                    first: "Ada".to_string(),
-                    last: "Lovelace".to_string(),
-                    phone: 1815551234,
-                    email: "ada@analytical.engine".to_string(),
-                },
-                Contact {
-                    id: 2,
-                    first: "Alan".to_string(),
-                    last: "Turing".to_string(),
-                    phone: 19125551234,
-                    email: "alan@bletchley.uk".to_string(),
-                },
-                Contact {
-                    id: 3,
-                    first: "Grace".to_string(),
-                    last: "Hopper".to_string(),
-                    phone: 19065551234,
-                    email: "grace@cobol.mil".to_string(),
-                },
-                Contact {
-                    id: 4,
-                    first: "Linus".to_string(),
-                    last: "Torvalds".to_string(),
-                    phone: 19695551234,
-                    email: "linus@kernel.org".to_string(),
-                },
-            ],
+        let default_contacts = vec![
+            NewContact {
+                first: "Margaret".to_string(),
+                last: "Hamilton".to_string(),
+                phone: 19365551234,
+                email: "margaret@apollo.nasa".to_string(),
+            },
+            NewContact {
+                first: "Ada".to_string(),
+                last: "Lovelace".to_string(),
+                phone: 1815551234,
+                email: "ada@analytical.engine".to_string(),
+            },
+            NewContact {
+                first: "Alan".to_string(),
+                last: "Turing".to_string(),
+                phone: 19125551234,
+                email: "alan@bletchley.uk".to_string(),
+            },
+            NewContact {
+                first: "Grace".to_string(),
+                last: "Hopper".to_string(),
+                phone: 19065551234,
+                email: "grace@cobol.mil".to_string(),
+            },
+            NewContact {
+                first: "Linus".to_string(),
+                last: "Torvalds".to_string(),
+                phone: 19695551234,
+                email: "linus@kernel.org".to_string(),
+            },
+        ];
+
+        let mut new_contacts = Self {
+            contacts: HashMap::new(),
+        };
+
+        for contact in default_contacts {
+            let _ = new_contacts.add(contact);
         }
+
+        new_contacts
     }
 
+    /// Returns a clone of all values
     pub fn all(&self) -> Vec<Contact> {
-        self.contacts.clone()
+        self.contacts.values().cloned().collect()
     }
 
     pub fn search(&self, term: &str) -> Vec<Contact> {
@@ -157,26 +162,23 @@ impl Contacts {
     }
 
     pub fn add(&mut self, new: NewContact) -> Result<(), ContactErrors> {
-        let id = self.contacts.iter().map(|c| c.id).max().unwrap_or(0) + 1;
+        let id = self.all().iter().map(|c| c.id).max().unwrap_or(0) + 1;
 
         let contact = new.into_contact(id)?;
-        self.contacts.push(contact);
+        self.contacts.insert(id, contact);
 
         Ok(())
     }
 
     pub fn get_by_id(&self, contact_id: u64) -> Option<Contact> {
-        self.contacts.iter().find(|c| c.id == contact_id).cloned()
-    }
-
-    pub fn has_id(&self, contact_id: u64) -> bool {
-        self.contacts.iter().any(|c| c.id == contact_id)
+        self.contacts.get(&contact_id).cloned()
     }
 
     pub fn edit(&mut self, contact_id: u64, edited: NewContact) -> Result<(), ContactErrors> {
         let contact = edited.into_contact(contact_id)?;
+        let current = self.contacts.get_mut(&contact_id);
 
-        if let Some(current) = self.contacts.iter_mut().find(|c| c.id == contact_id) {
+        if let Some(current) = current {
             current.first = contact.first;
             current.last = contact.last;
             current.email = contact.email;
@@ -187,5 +189,9 @@ impl Contacts {
             errors.id.push_str("Could not find contact ID");
             Err(errors)
         }
+    }
+
+    pub fn delete(&mut self, contact_id: u64) -> Option<Contact> {
+        self.contacts.remove(&contact_id)
     }
 }

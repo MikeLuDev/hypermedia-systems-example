@@ -35,5 +35,9 @@
     </fieldset>
   </form>
 
+  <form action="/contacts/{{ contact.id }}/delete" method="post">
+    <button>Delete Contact</button>
+  </form>
+
   <a href="/contacts">Back</a>
 {% endblock %}
