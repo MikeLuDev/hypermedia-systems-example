@@ -31,6 +31,8 @@ async fn main() {
         .route("/contacts/new", get(handlers::new_contact))
         .route("/contacts/new", post(handlers::create_new_contact))
         .route("/contacts/{id}", get(handlers::get_contact))
+        .route("/contacts/{id}/edit", get(handlers::edit_contact))
+        .route("/contacts/{id}/edit", post(handlers::post_edit_contact))
         .fallback(handlers::not_found)
         .with_state(app_state);
 

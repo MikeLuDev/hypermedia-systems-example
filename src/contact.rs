@@ -69,6 +69,7 @@ pub struct Contacts {
 
 // #[derive(Clone, Deserialize)]
 pub struct ContactErrors {
+    pub id: String,
     pub email: String,
     pub first: String,
     pub last: String,
@@ -87,6 +88,7 @@ impl ContactErrors {
 impl Default for ContactErrors {
     fn default() -> Self {
         Self {
+            id: String::new(),
             email: String::new(),
             first: String::new(),
             last: String::new(),
@@ -165,5 +167,25 @@ impl Contacts {
 
     pub fn get_by_id(&self, contact_id: u64) -> Option<Contact> {
         self.contacts.iter().find(|c| c.id == contact_id).cloned()
+    }
+
+    pub fn has_id(&self, contact_id: u64) -> bool {
+        self.contacts.iter().any(|c| c.id == contact_id)
+    }
+
+    pub fn edit(&mut self, contact_id: u64, edited: NewContact) -> Result<(), ContactErrors> {
+        let contact = edited.into_contact(contact_id)?;
+
+        if let Some(current) = self.contacts.iter_mut().find(|c| c.id == contact_id) {
+            current.first = contact.first;
+            current.last = contact.last;
+            current.email = contact.email;
+            current.phone = contact.phone;
+            Ok(())
+        } else {
+            let mut errors = ContactErrors::default();
+            errors.id.push_str("Could not find contact ID");
+            Err(errors)
+        }
     }
 }

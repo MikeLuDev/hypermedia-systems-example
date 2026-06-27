@@ -39,3 +39,10 @@ pub struct GetContactTemplate {
 #[derive(Template)]
 #[template(path = "404.html")]
 pub struct NotFoundTemplate {}
+
+#[derive(Template)]
+#[template(path = "edit_contact.html")]
+pub struct EditContactTemplate {
+    pub contact: Contact,
+    pub errors: ContactErrors,
+}

@@ -7,10 +7,13 @@ use axum::{
 use serde::Deserialize;
 
 use crate::{
-    contact::{ContactErrors, NewContact},
+    contact::{self, Contact, ContactErrors, NewContact},
     error::AppError,
-    state::AppState,
-    templates::{GetContactTemplate, IndexTemplate, NewContactTemplate, NotFoundTemplate},
+    state::{self, AppState},
+    templates::{
+        EditContactTemplate, GetContactTemplate, IndexTemplate, NewContactTemplate,
+        NotFoundTemplate,
+    },
 };
 
 #[derive(Deserialize)]
@@ -52,7 +55,6 @@ pub async fn create_new_contact(
     Form(form): Form<NewContact>,
 ) -> Result<Response, AppError> {
     let mut guard = state.contacts.write().await;
-
     let form_for_template = form.clone();
 
     let response = match guard.add(form) {
@@ -70,8 +72,8 @@ pub async fn create_new_contact(
 }
 
 pub async fn get_contact(
-    Path(contact_id): Path<u64>,
     State(state): State<AppState>,
+    Path(contact_id): Path<u64>,
 ) -> Result<impl IntoResponse, AppError> {
     let guard = state.contacts.read().await;
     let contact = guard.get_by_id(contact_id);
@@ -82,4 +84,51 @@ pub async fn get_contact(
     };
 
     Ok(Html(template?))
+}
+
+pub async fn edit_contact(
+    State(state): State<AppState>,
+    Path(contact_id): Path<u64>,
+) -> Result<impl IntoResponse, AppError> {
+    let guard = state.contacts.read().await;
+    let contact = guard.get_by_id(contact_id);
+
+    let template = match contact {
+        None => NotFoundTemplate {}.render(),
+        Some(contact) => EditContactTemplate {
+            contact,
+            errors: ContactErrors::default(),
+        }
+        .render(),
+    };
+
+    Ok(Html(template?))
+}
+
+pub async fn post_edit_contact(
+    State(state): State<AppState>,
+    Path(contact_id): Path<u64>,
+    Form(form): Form<NewContact>,
+) -> Result<Response, AppError> {
+    let mut guard = state.contacts.write().await;
+    let form_for_template = Contact {
+        id: contact_id,
+        first: form.first.clone(),
+        last: form.last.clone(),
+        phone: form.phone.clone(),
+        email: form.email.clone(),
+    };
+
+    let response = match guard.edit(contact_id, form) {
+        Err(errors) => {
+            let template = EditContactTemplate {
+                contact: form_for_template,
+                errors,
+            };
+            Html(template.render()?).into_response()
+        }
+        Ok(_) => Redirect::to("/contacts").into_response(),
+    };
+
+    Ok(response)
 }
