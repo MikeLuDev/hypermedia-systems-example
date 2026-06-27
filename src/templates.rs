@@ -29,3 +29,13 @@ pub struct NewContactTemplate {
     pub contact: NewContact,
     pub errors: ContactErrors,
 }
+
+#[derive(Template)]
+#[template(path = "get_contact.html")]
+pub struct GetContactTemplate {
+    pub contact: Contact,
+}
+
+#[derive(Template)]
+#[template(path = "404.html")]
+pub struct NotFoundTemplate {}

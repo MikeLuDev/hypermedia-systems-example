@@ -11,31 +11,29 @@
       <p>
         <label for="email">Email</label>
         <input name="email" id="email" type="email" value="{{ contact.email }}" />
-        <span class="error">{{ errors.email }}</span>
+        <span>{{ errors.email }}</span>
       </p>
       <p>
         <label for="first">First Name</label>
         <input name="first" id="first" type="text"
           placeholder="First Name" value="{{ contact.first }}">
-        <span class="error">{{ errors.first }}</span>
+        <span>{{ errors.first }}</span>
       </p>
       <p>
         <label for="last">Last Name</label>
         <input name="last" id="last" type="text"
           placeholder="Last Name" value="{{ contact.last }}">
-        <span class="error">{{ errors.last }}</span>
+        <span>{{ errors.last }}</span>
       </p>
       <p>
         <label for="phone">Phone</label>
         <input name="phone" id="phone" type="text" placeholder="Phone"
           value="{{ contact.phone }}">
-        <span class="error">{{ errors.phone }}</span>
+        <span>{{ errors.phone }}</span>
       </p>
       <button>Save</button>
     </fieldset>
   </form>
 
-  <p>
-    <a href="/contacts">Back</a>
-  </p>
+  <a href="/contacts">Back</a>
 {% endblock %}

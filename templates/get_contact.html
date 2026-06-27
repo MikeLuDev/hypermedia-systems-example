@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Contact Details{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block content %}
+  <p>You requested contact with ID: {{ contact.id }}</p>
+  <p>First Name: {{ contact.first }}</p>
+  <p>Last Name: {{ contact.last }}</p>
+  <p>Phone: {{ contact.phone }}</p>
+  <p>Email: {{ contact.email }}</p>
+  <a href="/contacts">Back</a>
+{% endblock %}

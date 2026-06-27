@@ -162,4 +162,8 @@ impl Contacts {
 
         Ok(())
     }
+
+    pub fn get_by_id(&self, contact_id: u64) -> Option<Contact> {
+        self.contacts.iter().find(|c| c.id == contact_id).cloned()
+    }
 }
